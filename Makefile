@@ -102,7 +102,7 @@ dll_2: $(LIB_2_C_SRCS) $(LIB_2_CXX_SRCS)
 	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_2).so -shared
 
 dll_3: $(LIB_3_C_SRCS) $(LIB_3_CXX_SRCS)
-	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_3).so -shared -L. -ladd -lsub
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_3).so -shared
 
 # 11. demo生成
 exe: $(DEMO_C_SRCS) $(DEMO_CXX_SRCS)
