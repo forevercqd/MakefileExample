@@ -25,13 +25,13 @@ ROOT = $(shell pwd)
 LIB_TARGET_1	=add
 LIB_TARGET_2	=sub
 LIB_TARGET_3	=add_sub
-DEMO_TARGET	= demo_test
+DEMO_TARGET	=demo_test
 
 
 # Q1 BITS未传进时，默认为32位，传进来时，定义为传进值
 BITS	= #32
 LDFLAGS	= -L. -l$(LIB_TARGET_3) -l$(LIB_TARGET_2)  -l$(LIB_TARGET_1)
-#LDFLAGS	+= -e main #ld来链接时，指定入口函数
+LDFLAGS	+= -e main #ld来链接时，指定入口函数
 
 ifeq ($(BITS),32)
 	CFLAGS_COMMON 	+= -m32
@@ -48,7 +48,7 @@ endif
 
 # 2. 宏定义
 # .c
-CFLAGS_COMMON +=  -fPIC -shared
+CFLAGS_COMMON +=  -fPIC
 
 # .cpp
 CXXFLAGS +=
@@ -96,13 +96,13 @@ all: mkdirectory dll_1 dll_2 dll_3 exe
 
 # 10. 库的生成
 dll_1: $(LIB_1_C_SRCS) $(LIB_1_CXX_SRCS)
-	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_1).so
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_1).so -shared
 
 dll_2: $(LIB_2_C_SRCS) $(LIB_2_CXX_SRCS)
-	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_2).so
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_2).so -shared
 
 dll_3: $(LIB_3_C_SRCS) $(LIB_3_CXX_SRCS)
-	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_3).so -L. -ladd -lsub
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_3).so -shared -L. -ladd -lsub
 
 # 11. demo生成
 exe: $(DEMO_C_SRCS) $(DEMO_CXX_SRCS)
