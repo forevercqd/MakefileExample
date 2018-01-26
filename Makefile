@@ -14,39 +14,41 @@ CROSS	=
 # Compilation Tools
 CC	= $(CROSS)gcc
 CXX	= $(CROSS)g++
-LD	= $(CROSS)cc
+LD	= $(CROSS)g++
 AR	= $(CROSS)ar
 AS	= $(CROSS)as
 RM 	= rm -f
 
 ROOT = $(shell pwd)
 
+# 5. 输出变量
+LIB_TARGET_1	=add
+LIB_TARGET_2	=sub
+LIB_TARGET_3	=add_sub
+DEMO_TARGET	= demo_test
+
+
 # Q1 BITS未传进时，默认为32位，传进来时，定义为传进值
-BITS	= 32
-LDFLAGS	= -lm 
+BITS	= #32
+LDFLAGS	= -L. -l$(LIB_TARGET_3) -l$(LIB_TARGET_2)  -l$(LIB_TARGET_1)
 #LDFLAGS	+= -e main #ld来链接时，指定入口函数
 
 ifeq ($(BITS),32)
-	CFLAGS 	+= -m32
-	CXXFLAGS+= -m32	
+	CFLAGS_COMMON 	+= -m32
 	LDFLAGS	+= -m32
 	#LDFLAGS	+= -melf_i386 #使用ld链接时指定链接的是32位库:
 endif
 
 # 1. 优化级别
 ifeq ($(debug), 1)
-	CFLAGS += -g3
-	CXXFLAGS += -g3
+	CFLAGS_COMMON += -g3
 else
-	CFLAGS += -O3
-	CXXFLAGS += -O3
-	
+	CFLAGS_COMMON += -O3
 endif
 
 # 2. 宏定义
 # .c
-CFLAGS +=
-CFLAGS +=
+CFLAGS_COMMON +=  -fPIC -shared
 
 # .cpp
 CXXFLAGS +=
@@ -61,60 +63,51 @@ BUILD_DIR = x86_$(BITS)
 # lib_src
 vpath %.c 
 
-vpath %.cpp	
+vpath %.cpp	$(ROOT)/src/
 
 # demo_src
 vpath %.c  $(ROOT)/src/
 
-# 5. 输出变量
-LIB_TARGET	= 
-DEMO_TARGET	= demo_test
-
 
 # 6. 头文件路径
 # .c
+CFLAGS_COMMON += -I./src/
 CFLAGS +=
 
 # .cpp
 CXXFLAGS += 
 
 # 7. 库的源文件、obj
-LIB_C_SRCS   +=	
-LIB_C_OBJS	= $(patsubst %.c,$(BUILD_DIR)/%.o, $(LIB_C_SRCS))
+LIB_1_C_SRCS	+=
+LIB_1_CXX_SRCS  +=	add.cpp
 
-LIB_CXX_SRCS	= 
-LIB_CXX_OBJS	= $(patsubst %.cpp,$(BUILD_DIR)/%.o, $(LIB_CXX_SRCS))
+LIB_2_C_SRCS	+=
+LIB_2_CXX_SRCS  +=	sub.cpp
+
+LIB_3_C_SRCS	+=
+LIB_3_CXX_SRCS	+=	add_sub.cpp
 
 # 8. demo的源目录、obj
-DEMO_C_SRCS  = swap.c main.c
-DEMO_C_OBJS  = $(patsubst %.c, $(BUILD_DIR)/%.o,$(DEMO_C_SRCS))
-
-DEMO_CXX_SRCS	= 
-DEMO_CXX_OBJS	= $(patsubst %.cpp,$(BUILD_DIR)/%.o, $(DEMO_CXX_SRCS))
+DEMO_C_SRCS		=  
+DEMO_CXX_SRCS	= main.cpp
 
 # 9. 默认的输出
-all: mkdirectory $(LIB_TARGET) $(DEMO_TARGET)
+all: mkdirectory dll_1 dll_2 dll_3 exe
 
 # 10. 库的生成
-$(LIB_TARGET): $(LIB_C_OBJS) $(LIB_CXX_OBJS)
-	$(AR)  $(ARFLAGS)   $@	$^
+dll_1: $(LIB_1_C_SRCS) $(LIB_1_CXX_SRCS)
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_1).so
 
-$(LIB_CXX_OBJS): $(BUILD_DIR)/%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS)  -o $@ $<
+dll_2: $(LIB_2_C_SRCS) $(LIB_2_CXX_SRCS)
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_2).so
 
-$(LIB_C_OBJS): $(BUILD_DIR)/%.o: %.c
-	$(CC) -c $(CFLAGS)  -o $@ $<
-	
+dll_3: $(LIB_3_C_SRCS) $(LIB_3_CXX_SRCS)
+	$(CXX) $(CFLAGS_COMMON) $^ -o lib$(LIB_TARGET_3).so -L. -ladd -lsub
+
 # 11. demo生成
-$(DEMO_TARGET): $(DEMO_C_OBJS) $(DEMO_CXX_SRCS)
-	$(LD) $(LDFLAGS)  $^ $(LIB_TARGET) -o $@
+exe: $(DEMO_C_SRCS) $(DEMO_CXX_SRCS)
+	$(LD) $(CFLAGS_COMMON)   $^  -o $(DEMO_TARGET) $(LDFLAGS) 
 
-$(DEMO_CXX_OBJS): $(BUILD_DIR)/%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS)  -o $@ $<
-
-$(DEMO_C_OBJS): $(BUILD_DIR)/%.o: %.c
-	$(CC) -c $(CFLAGS)  -o $@ $<
-	
 # 12. 创建目录
 .phony:build
 
@@ -123,7 +116,8 @@ mkdirectory:
 
 # 13. 清理
 clean:
-	$(RM) $(LIB_C_OBJS)  $(LIB_CXX_OBJS) $(DEMO_C_OBJS)  $(DEMO_CXX_OBJS) $(DEMO_TARGET)  $(LIB_TARGET)
+	$(RM) lib$(LIB_TARGET_1).so lib$(LIB_TARGET_2).so lib$(LIB_TARGET_3).so
+	$(RM) $(DEMO_TARGET)
 	
 # 14. 打印消息
 print:
