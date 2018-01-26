@@ -1,13 +1,6 @@
 #********************************************************************
 #	File Name		: Makefile 	    	
 #	Author			: Cheng_Qingdong
-#	Copyright 1992-2013, ZheJiang Dahua Technology Stock Co.Ltd.
-# 						All Rights Reserved
-#
-#	Description		: for Carlogo recognization
-#	Created			: 2014/09/23  14:08
-#	Changelog		: (date:author:modify sth)
-#
 #*********************************************************************
 
 CROSS	= 
