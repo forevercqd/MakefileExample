@@ -31,7 +31,7 @@ DEMO_TARGET	=demo_test
 # Q1 BITS未传进时，默认为32位，传进来时，定义为传进值
 BITS	= #32
 LDFLAGS	= -L. -l$(LIB_TARGET_3) -l$(LIB_TARGET_2)  -l$(LIB_TARGET_1)
-LDFLAGS	+= -e main #ld来链接时，指定入口函数
+#LDFLAGS	+= -e main #ld来链接时，指定入口函数
 
 ifeq ($(BITS),32)
 	CFLAGS_COMMON 	+= -m32
